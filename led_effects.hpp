@@ -47,3 +47,42 @@ void slide(CRGB input)
     delay(5);
   }
 }
+
+//note that this will take longer as more colors are unlocked
+void update_leds (bool element_latches[])
+{
+  //default slide
+  slide(CRGB (255,225,128));
+  
+  //add more colors to the slide as they latch
+  if(element_latches [0])
+  {
+    slide(CRGB::Red);
+  }
+  if(element_latches [1])
+  {
+    slide(CRGB::Green);
+  }
+  if(element_latches [2])
+  {
+    slide(CRGB::DarkBlue);
+  }
+  if(element_latches [3])
+  {
+    slide(CRGB::Yellow);
+  }
+  
+}
+
+void lightShow ()
+{
+  Serial.println("latched!");
+  for(int i = 0; i < 10; i++)
+  {
+    //update_relays(0x0F);
+    delay(50);
+    //update_relays(0x00);
+    delay(50);
+  }
+}
+
