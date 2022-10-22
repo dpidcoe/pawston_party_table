@@ -1,6 +1,8 @@
 
 #define NUM_LEDS 100
 
+extern volatile bool g_element_latches[4];
+
 CRGB leds1[NUM_LEDS];
 CRGB leds2[NUM_LEDS];
 
@@ -49,25 +51,25 @@ void slide(CRGB input)
 }
 
 //note that this will take longer as more colors are unlocked
-void update_leds (bool element_latches[])
+void update_leds ()
 {
   //default slide
   slide(CRGB (255,225,128));
   
   //add more colors to the slide as they latch
-  if(element_latches [0])
+  if(g_element_latches [0])
   {
     slide(CRGB::Red);
   }
-  if(element_latches [1])
+  if(g_element_latches [1])
   {
     slide(CRGB::Green);
   }
-  if(element_latches [2])
+  if(g_element_latches [2])
   {
     slide(CRGB::DarkBlue);
   }
-  if(element_latches [3])
+  if(g_element_latches [3])
   {
     slide(CRGB::Yellow);
   }
@@ -85,4 +87,3 @@ void lightShow ()
     delay(50);
   }
 }
-

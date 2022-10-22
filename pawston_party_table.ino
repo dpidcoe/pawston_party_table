@@ -60,7 +60,7 @@ void setup ()
 void loop()
 {
   //do the shitty neopixel stuff here
-  update_leds(g_element_latches);
+  update_leds();
 }
 
 //callback for timer, should be on the order of ~10ms
