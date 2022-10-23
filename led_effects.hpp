@@ -1,10 +1,12 @@
 
-#define NUM_LEDS 100
+#define NUM_LEDS 50
 
 extern volatile bool g_element_latches[4];
 
 CRGB leds1[NUM_LEDS];
 CRGB leds2[NUM_LEDS];
+
+uint8_t gHue = 0; // rotating "base color" used by many of the patterns
 
 void fadeall() 
 {
@@ -52,9 +54,9 @@ void slide(CRGB input)
 
 //note that this will take longer as more colors are unlocked
 void update_leds ()
-{
+{  
   //default slide
-  slide(CRGB (255,225,128));
+  //slide(CRGB (255,225,128));
   
   //add more colors to the slide as they latch
   if(g_element_latches [0])
@@ -67,7 +69,7 @@ void update_leds ()
   }
   if(g_element_latches [2])
   {
-    slide(CRGB::DarkBlue);
+    slide(CRGB::Blue);
   }
   if(g_element_latches [3])
   {
@@ -82,8 +84,18 @@ void lightShow ()
   for(int i = 0; i < 10; i++)
   {
     //update_relays(0x0F);
-    delay(50);
+    //delay(50);
     //update_relays(0x00);
-    delay(50);
+    //delay(50);
+
+    EVERY_N_MILLISECONDS( 20 ) { gHue++; } // slowly cycle the "base color" through the rainbow
+    // confetti - random colored speckles that blink in and fade smoothly
+    fadeToBlackBy( leds1, NUM_LEDS, 10);
+    fadeToBlackBy( leds2, NUM_LEDS, 10);
+    int pos = random16(NUM_LEDS);
+    leds1[pos] += CHSV( gHue + random8(64), 200, 255);
+    leds2[pos] += CHSV( gHue + random8(64), 200, 255);
+    FastLED.show();
+    delay(10);
   }
 }
