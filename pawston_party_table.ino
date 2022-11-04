@@ -57,6 +57,10 @@ void setup ()
   
 }
 
+
+
+
+
 void loop()
 {
   //do the shitty neopixel stuff here
@@ -94,10 +98,11 @@ void update_relays ()
   }
   
   //
-  if(count >= 4)
+  if(count == 4)
   {
-    clear_latches ();
+    //clear_latches ();
     g_element_lightshow = true;
+    lightShow();
   }
 }
 
