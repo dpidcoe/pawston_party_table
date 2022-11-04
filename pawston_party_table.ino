@@ -57,10 +57,6 @@ void setup ()
   
 }
 
-
-
-
-
 void loop()
 {
   //do the shitty neopixel stuff here
@@ -85,7 +81,6 @@ void update_buttons ()
   
   update_relays ();
   
-  
 }
 
 void update_relays ()
@@ -97,7 +92,6 @@ void update_relays ()
     count += g_element_latches[i];
   }
   
-  //
   if(count == 4)
   {
     //clear_latches ();
