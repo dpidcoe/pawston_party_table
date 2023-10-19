@@ -80,7 +80,6 @@ void lightShow ()
 //note that this will take longer as more colors are unlocked
 void update_leds ()
 {
-  
   if (g_element_lightshow)
   {
     g_element_lightshow = false;

@@ -13,16 +13,18 @@ IntervalTimer myTimer;
 const int BUTTON_PINS[4] = {0, 1, 2, 3};
 //which pins go to which relays
 const int RELAY_PINS[4] = {5, 6, 7, 8};
-//button counters for buttons 0-4
+//button counters for buttons 0-3
 uint8_t button_debounce_counter[4];
 //how many timer cycles before we consider a button pressed
 const uint8_t minimum_debounce = 2;
 //global state for setting valid element colors
 volatile bool g_element_latches[4];
 //global state for setting button edge detect
-volatile int g_element_edging[4];
+volatile int g_element_edging;
 //global for when there's a lightshow
 volatile bool g_element_lightshow = false;
+// How long the other 3 dispensers should be off for when a color is pressed. Pouring takes about 3 seconds.
+const int DISPENSER_OFF_TIME_SECS = 5;
 
 bool LED_STATE = LOW;
 
@@ -77,35 +79,46 @@ void update_buttons ()
     //button has been released after being held down for at least the minimum time
     if (!buttonState && button_debounce_counter[i] > minimum_debounce)
     {
-      g_element_edging[i] = 100;
+      g_element_edging = DISPENSER_OFF_TIME_SECS * 1000 / 10;
       g_element_latches[i] = true;
+      single_color(i);
     }
   }
   
-  update_relays ();
-  
+  update_relays();
+}
+
+// Turns off all dispensers except the selected one.
+void single_color(int index)
+{
+  digitalWrite(RELAY_PINS[0], index == 0);
+  digitalWrite(RELAY_PINS[1], index == 1);
+  digitalWrite(RELAY_PINS[2], index == 2);
+  digitalWrite(RELAY_PINS[3], index == 3);
+}
+
+void all_dispensers(void)
+{
+  digitalWrite(RELAY_PINS[0], HIGH);
+  digitalWrite(RELAY_PINS[1], HIGH);
+  digitalWrite(RELAY_PINS[2], HIGH);
+  digitalWrite(RELAY_PINS[3], HIGH);
 }
 
 void update_relays ()
 {
   int count = 0;
-  for(int i = 0; i < 4; i++)
+  if(g_element_edging == 0)
   {
-    if(g_element_edging[i] == 0)
-    {
-      digitalWrite(RELAY_PINS[i], g_element_latches[i]);
-      count += g_element_latches[i];
-    }
-    else
-    {
-      g_element_edging[i]--;
-      digitalWrite(RELAY_PINS[i], LOW);
-    }
+    all_dispensers();
+  }
+  else
+  {
+    g_element_edging--;
   }
   
   if(count == 4)
   {
     g_element_lightshow = true;
-    
   }
 }
