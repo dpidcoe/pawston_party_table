@@ -2,11 +2,10 @@
 #define NUM_LEDS 50
 
 extern volatile bool g_element_latches[4];
+extern volatile bool g_element_lightshow;
 
 CRGB leds1[NUM_LEDS];
 CRGB leds2[NUM_LEDS];
-
-uint8_t gHue = 0; // rotating "base color" used by many of the patterns
 
 void fadeall() 
 {
@@ -15,6 +14,14 @@ void fadeall()
     leds1[i].nscale8(250);
     leds2[i].nscale8(250);
   } 
+}
+
+void clear_latches ()
+{
+  for(int i = 0; i < 4; i++)
+  {
+    g_element_latches[i] = false;
+  }
 }
 
 void slide(CRGB input)
@@ -52,9 +59,36 @@ void slide(CRGB input)
   }
 }
 
+void lightShow ()
+{
+  static uint8_t hue = 0; // rotating "base color" used by many of the patterns
+  Serial.println ("doing lightshow");
+  for (int i = 0; i < 250; i++)
+  {
+    EVERY_N_MILLISECONDS ( 20 ) { hue++; } // slowly cycle the "base color" through the rainbow
+    // confetti - random colored speckles that blink in and fade smoothly
+    fadeToBlackBy ( leds1, NUM_LEDS, 10);
+    fadeToBlackBy ( leds2, NUM_LEDS, 10);
+    int pos = random16 (NUM_LEDS);
+    leds1[pos] += CHSV ( hue + random8(64), 200, 255);
+    leds2[pos] += CHSV ( hue + random8(64), 200, 255);
+    FastLED.show ();
+    delay (20);
+  }
+}
+
 //note that this will take longer as more colors are unlocked
 void update_leds ()
 {
+  
+  if (g_element_lightshow)
+  {
+    g_element_lightshow = false;
+    lightShow ();
+    clear_latches ();
+    return;
+  }
+  
   bool playDefaultWhite = true;
   //add more colors to the slide as they latch
   //note that each of these blocks until the light effect finishes playing
@@ -82,26 +116,5 @@ void update_leds ()
   {
     slide(CRGB (255,225,128));
   }
-}
-
-void lightShow ()
-{
-  Serial.println ("latched!");
-  for (int i = 0; i < 10; i++)
-  {
-    //update_relays(0x0F);
-    //delay(50);
-    //update_relays(0x00);
-    //delay(50);
-
-    EVERY_N_MILLISECONDS ( 20 ) { gHue++; } // slowly cycle the "base color" through the rainbow
-    // confetti - random colored speckles that blink in and fade smoothly
-    fadeToBlackBy ( leds1, NUM_LEDS, 10);
-    fadeToBlackBy ( leds2, NUM_LEDS, 10);
-    int pos = random16 (NUM_LEDS);
-    leds1[pos] += CHSV ( gHue + random8(64), 200, 255);
-    leds2[pos] += CHSV ( gHue + random8(64), 200, 255);
-    FastLED.show ();
-    delay (10);
-  }
+  
 }

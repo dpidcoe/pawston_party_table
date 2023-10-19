@@ -16,9 +16,11 @@ const int RELAY_PINS[4] = {5, 6, 7, 8};
 //button counters for buttons 0-4
 uint8_t button_debounce_counter[4];
 //how many timer cycles before we consider a button pressed
-const uint8_t minimum_debounce = 3;
+const uint8_t minimum_debounce = 2;
 //global state for setting valid element colors
 volatile bool g_element_latches[4];
+//global state for setting button edge detect
+volatile int g_element_edging[4];
 //global for when there's a lightshow
 volatile bool g_element_lightshow = false;
 
@@ -57,10 +59,6 @@ void setup ()
   
 }
 
-
-
-
-
 void loop()
 {
   //do the shitty neopixel stuff here
@@ -76,15 +74,15 @@ void update_buttons ()
     int buttonState = digitalRead (BUTTON_PINS[i]);
     button_debounce_counter[i] += buttonState;
     
-    //button has been released after b eing held down for at least the minimum time
+    //button has been released after being held down for at least the minimum time
     if (!buttonState && button_debounce_counter[i] > minimum_debounce)
     {
+      g_element_edging[i] = 100;
       g_element_latches[i] = true;
     }
   }
   
   update_relays ();
-  
   
 }
 
@@ -93,23 +91,21 @@ void update_relays ()
   int count = 0;
   for(int i = 0; i < 4; i++)
   {
-    digitalWrite(RELAY_PINS[i], g_element_latches[i]);
-    count += g_element_latches[i];
+    if(g_element_edging[i] == 0)
+    {
+      digitalWrite(RELAY_PINS[i], g_element_latches[i]);
+      count += g_element_latches[i];
+    }
+    else
+    {
+      g_element_edging[i]--;
+      digitalWrite(RELAY_PINS[i], LOW);
+    }
   }
   
-  //
   if(count == 4)
   {
-    //clear_latches ();
     g_element_lightshow = true;
-    lightShow();
-  }
-}
-
-void clear_latches ()
-{
-  for(int i = 0; i < 4; i++)
-  {
-    g_element_latches[i] = 0;
+    
   }
 }
